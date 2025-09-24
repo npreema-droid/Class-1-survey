@@ -1,0 +1,572 @@
+---
+title: "Starbucks Demo"
+author: "Kim Johnson"
+date: ''
+output:
+  slidy_presentation: default
+---
+
+# Note for experienced R users
+
+-   This will be a basic overview but you may learn a few things anyway as I did when preparing this demo! ![Dog](images/dog.jpeg)
+
+# Learning objectives
+
+1.  Learn common R terminology
+2.  Import data, clean, and manage data from common data file types
+
+# Outline
+
+-   R basics (R studio, R file types, R terminology)
+-   Installing packages and libraries
+-   Importing data of different file types and from different locations
+-   Characterizing datasets
+-   Renaming, cleaning, and creating variables
+-   Changing variable types (numerical, factor, character)
+-   Deleting columns
+-   Deleting rows/omitting NAs
+-   Categorization of variables
+-   Tables
+-   Editing data values
+-   Subsetting for analysis
+-   Simple stats (mean, median, etc.)
+-   Creating new datasets (cbind, rbind, merge)
+-   Exporting datasets
+
+# R basics: R studio
+
+-   R panes
+    -   console
+    -   environment
+    -   files
+    -   plots
+    -   packages
+    -   help
+
+# R file types
+
+-   There are 3 main file types used for coding in R:
+    -   R Script
+    -   R Markdown
+    -   R Notebook
+-   You can select your file type for your code through the **File** pull down menu -\> **New file**
+-   R Script is a text file containing the commands that you would enter into the console. It provides a written record of your code that you save.
+-   R markdown and R notebook are literate programming language files that we recommend using.
+
+# R file types (continued)
+
+-   R Markdown and Notebook files end in .RMD and are highly valuable for making reports.
+-   In both file types, *code chunks* are embedded within *plain text* that describes what a block of code does and/or what the code output is.
+-   Instead of results showing up in the console or plots window when using a R script file, they show up below code chunks and allow the creation of beautiful reports using *Knit*
+-   Knit can quickly generate data analysis reports in several file formats including PDF, Word, HTML
+-   For more on R Markdown, see: <https://rmarkdown.rstudio.com/lesson-15.HTML>
+
+![R Markdown outputs](images/RMDOutputFormats.png)
+
+# YAML Header in R Markdown and R Notebook files
+
+-   It stands for *YAML Aint Markup Language*
+-   From Wikipedia: *"It is a human-readable data serialization language."*
+-   It is used to specify output document types as well as parameters for a markdown file
+-   It is at the top of your markdown file and looks like this:
+
+![YAML](images/YAML.png)
+
+# R terminology
+
+-   **environment**: where your objects are stored. Think of it like a directory of what is currently stored in R.
+-   **objects**: These store information of different types (e.g. variables, dataframes, functions, lists, vectors) and are anything to the left of the assignment operator.
+-   **assignment operator**: **\<-** is the most common symbol that is used to assign an object on its left to a value on its right.
+-   **\<-** assigns a value to a variable from right to left
+-   **-\>** assigns a value to a variable from left to right
+-   **=** can also be used but is not recommended because it is used on other ways in R.
+-   Example: **x \<- 3** means the object x is now assigned the value of 3 (you will see x in your environment under values). You can also use a single = sign but we recommend not using an equal sign since equal signs are used elsewhere to mean other things and it can get confusing.
+-   You will see the value of 3 assigned to x show up in your environment under values. Let's try it.
+
+```{r, chunk1}
+x <- 3
+x
+```
+
+# R terminology (continued)
+
+-   **dataframes**: are R's version of datasets. We can create one for x using the below code.
+-   It is stored in the environment under data
+
+```{r, chunk2}
+df <- data.frame(x)
+```
+
+# R terminology (continued)
+
+-   **vectors/lists**: a vector is a list of something. In R, we use vectors and lists a lot. If we wanted to create a list of numbers 1-5, we could specify a vector as c(1,2,3,4,5) or c(1:5), run the code x \<- c(1,2,3,4,5) and y \<- c(1:5) and then print x and y just by typing x and y in the console.
+-   There are two types of vectors: 1) atomic vectors (contain a single class of a data type), and 2) lists (can contain multiple classes of data types). c(1,2,3,4,5) is an atomic vector while c("c", "a", 3, 4, "dataframe") is a list or generic vector because it contains multiple data types.
+-   Let's create the x and y vectors and print them
+
+```{r, chunk3}
+x <- c(1,2,3,4,5)
+y <- c(1:5)
+x
+y
+```
+
+# Let's create the list above and print it
+
+```{r, chunk4}
+mylist <- c("c", "a", 3, 4, "dataframe")
+mylist
+```
+
+# R coding terminology (continued)
+
+-   **functions**: these are the work horse of R. They are made up of "behind the scenes" code that performs tasks like getting means, plots, regression results etc. They are composed of a function name and arguments (you provide values (e.g. dataframe to perform function on)) and they return a value.
+-   As a beginner most of the functions you use will already be made but you can create a simple one as below to take the mean of x and y
+-   a function is a word the precedes a set of parentheses. Inside the parentheses, there are arguments. In the below function, v is the argument. We create the function called "myfun" with the function called **function**.
+
+```{r, chunk5}
+myfun <- function(v){
+  mean(v)
+}
+
+myfun(v=x)
+myfun(v=y)
+myfun(v=c(1,2,3,4,5))
+
+# Check with mean function that already exists
+mean(x)
+mean(y)
+```
+
+# R terminology (continued)
+
+-   **packages**: packages are like software. You install them using the install.packages function from something called the CRAN. Packages contain functions that we use for data management and analysis. R/R studio comes with base and stats packages that contain some commonly used functions so these never need to be installed.
+-   **libraries**: to access the functions contained in packages, you must open them. The library function opens the packages for us. This is similar to having Microsoft word installed but you can't make a word document until you open it.
+
+# Let's install some packages and open some libraries.
+
+-   Note that "commenting" can be used with a hashtag to skip over text (or code) you do not want R to evaluate and run (and then give you an error). We usually use comments to provide annotations for our code. Below, I am using it to have R skip over code I don't want to run.
+-   Since I already have the packages installed that we will use and do not want to install them again I have commented them out. You should remove the hashtags to run them.
+
+```{r, chunk6}
+# install.packages("haven") 
+# install.packages("readr") 
+# install.packages("dplyr")
+# install.packages("openxlsx")
+
+# for SPSS (read_sav()), stata (read_dta()), SAS(read_sas()) and xpt (read_xpt()) files
+library(haven) 
+
+# for reading csv file (read_csv())
+library(readr)
+
+# for data management
+library(dplyr) 
+
+# for exporting excel files
+library(openxlsx) 
+
+# we can also use the pacman package that automatically checks for packages, installs them if not found, and opens the associated library once installed
+
+# install.packages("pacman") # command return to run a line of code
+pacman::p_load(haven, readr, dplyr, openxlsx)
+```
+
+# Let's read in some different file types from the web, specifically Github, a common place where data is stored.
+
+-   **NOTE about copying links to datasets housed on Github:** On Github (<https://github.com/kijohnson/Advanced-Data-Analysis>), right click copy and paste the link address, which should include the word raw in the link.
+
+# read in csv file
+
+```{r, chunk7, message=FALSE}
+starbucks_csv <-
+ read_csv(
+   "https://github.com/kijohnson/Advanced-Data-Analysis/raw/refs/heads/main/starbucks_csv.csv"
+   )
+```
+
+# read in stata file
+
+```{r, chunk8}
+starbucks_stata <-
+  read_dta(
+    "https://github.com/kijohnson/Advanced-Data-Analysis/raw/refs/heads/main/starbucks_stata.dta"
+  )
+```
+
+# read in tab file
+
+```{r, chunk9}
+starbucks_tab <-
+  read.delim(
+    "https://github.com/kijohnson/Advanced-Data-Analysis/raw/refs/heads/main/starbucks_tab.txt"
+  )
+```
+
+# read in SAS XPT file
+
+```{r, chunk10}
+starbucks_xpt <-
+  read_xpt(
+    "https://github.com/kijohnson/Advanced-Data-Analysis/raw/refs/heads/main/starbucks_xpt.xpt"
+  ) 
+```
+
+# read SPSS file
+
+```{r, chunk11}
+starbucks_spss <-
+  read_sav(
+    "https://github.com/kijohnson/Advanced-Data-Analysis/raw/refs/heads/main/starbucks_spss.sav")
+```
+
+# Suppose instead we want to read a file from our computer--how would we do that?
+
+-   There are a few different methods:
+    1.  with file name in quotes,
+    2.  using file path, and
+    3.  using R studio's Import Dataset pull down menu
+
+# Method 1: With file name in quotes
+
+-   If we put the code in the same directory (aka folder) as our dataset, we do not have to specify the path and can import like below.
+-   The advantage of this method is that it is totally reproducible. If you share your code and data with someone else and they put the code in the same folder as the data, they will not have to modify the code for the data location (i.e. path).
+
+```{r, chunk12}
+starbucks_spss.same <- read_sav("starbucks_spss.sav")
+```
+
+# Method 2: Using file path
+
+-   If our data is in a different directory than our code, we need to specify the path. However, we don't like this method because if you share the code with someone else they will have to change the code for their own computer and it is not entirely reproducible.
+
+```{r, chunk13}
+starbucks_spss.different <- read_sav("/Users/kimjohnson/Library/CloudStorage/Box-Box/A_T Drive - kjohnson/Teaching/Courses/ADA/ADA_Fall_2025/1_Class 1 (Reproducible Research 1)/starbucks_demo/starbucks_spss.sav")
+```
+
+# Method 3: Using R studio's Import Dataset pull down menu
+
+-   Use the import dataset menu in the environment and copy the code into the chunk (code is copied and then customized) ![](images/import.png)
+
+```{r, chunk14}
+starbucks_spss <- read_sav("starbucks_spss.sav")
+```
+
+# One of the first things you will want to do after you have successfully imported your data is understand your dataset in terms of number of obs, variables, basic summary stats, and missing data.
+
+# First let's view the dataset
+
+-   You can do this by double clicking on the dataset in the global environment
+-   or by using the View function
+
+```{r, chunk15}
+View(starbucks_xpt)
+```
+
+# Characterize the dataset (we will use starbucks_xpt)
+
+-   To get the number of rows and columns, you can look in your global environment where your dataframes are listed or use the dim function
+
+```{r, chunk16}
+dim(starbucks_xpt) 
+```
+
+-   We can get a basic summary of variable types using the sapply function, which applies a function specified below as the second argument in parentheses to an object specified below as the first object in parentheses.
+
+```{r, chunk17}
+sapply(starbucks_xpt, typeof)
+
+typeof(starbucks_xpt$DRINK)
+```
+
+# Side note: But wait, how do you know what argument goes where?
+
+```{r}
+# type sapply into help and let's solve
+```
+
+# We can also get a particular variable's type using the class function
+
+-   To run a function on a particular column, you can use the dataframe name followed by the variable separated by the dollar sign (\$). This tells R to look inside the dataframe called starbucks_xpt (which is found in the environment) for the column named DRINK and run the class function to determine the variable type.
+
+```{r, chunk18}
+class(starbucks_xpt$DRINK)
+```
+
+# Brief discussion of variable types
+
+-   **character** variables are text strings. Import functions look at several lines of code to detect the type of variable and then classify them according to those several lines. Sometimes it can be wrong, especially when character variables are classified as factors. Examples of values for character variables: are "dog", "boy", "10". They are contained in single or double quotes.
+-   **factor** variables are categorical variables where observations are assigned to a certain numerical category based on a characteristic or characteristics. We will talk more about how to create categorical/factor variables later.
+-   **numerical** variables are numbers. Examples are 2, -2, 5.6.
+-   **double** is one type of numerical variable that is different from an integer in that it can include numbers after a decimal point.
+-   **integer** variables are a type of numerical variable that only includes whole number values.
+-   **logical** variables take the values of True or False. Sometimes called Boolean.
+
+# Renaming variables
+
+-   Point to remember about renaming variables: always try to use descriptive names rather than x, y, a, b, c.
+-   There are several ways to do this. I will show one.
+-   First, let's get the variable names using the colnames function.
+
+```{r, chunk19}
+colnames(starbucks_xpt)
+```
+
+# Use the rename function from the dplyr package to rename specific variables
+
+-   in the second argument the new name is before the equal sign and the old name is after
+
+```{r, chunk22}
+starbucks_xpt <- rename(starbucks_xpt, c("calories" = "CALORIES"))
+```
+
+# Converting variables to a different type
+
+-   There are several functions for this:
+    1.  **as.numeric** converts a variable to numeric,
+    2.  **as.factor** converts a variable to categorical,
+    3.  **as.character** converts a variable to string or character,
+    4.  **as.Date** converts a character date to a date
+-   Note if your variable is imported as a factor variable and you want to convert it to numeric, you **MUST** first convert it to a character variable using as.character and then to a numeric variable using as.numeric. This is because R will store factor variables at integer levels so if your lowest level is 50 then R will store it as 1. Not recognizing this can lead to serious errors in values and statistics.
+
+# Converting the character variable calories to numeric
+
+```{r, chunk23, echo=TRUE, warning=FALSE}
+# first check class again
+class(starbucks_xpt$calories)
+
+# convert calories variable to numeric using the as.numeric function for stats
+starbucks_xpt$calories_n <- as.numeric(starbucks_xpt$calories)
+
+# check the class of the new numeric calorie variable
+class(starbucks_xpt$calories_n)
+```
+
+# Now that calories is numeric, we can get simple statistics using several functions below that are in one of the built-in R packages
+
+-   The mean, median, sd, var, and quantile functions require removal of NAs (i.e. observations with missing values) to run. The summary function does not.
+
+```{r, chunk24, echo=TRUE, warning=FALSE}
+# get summary stats
+summary(starbucks_xpt$calories_n) 
+
+# get mean
+mean(starbucks_xpt$calories_n, na.rm=TRUE) 
+
+# get median
+median(starbucks_xpt$calories_n, na.rm=TRUE) 
+
+# get sd
+sd(starbucks_xpt$calories_n, na.rm=TRUE) 
+
+# get variance
+var(starbucks_xpt$calories_n, na.rm=TRUE) 
+
+# get quantile
+quantile(starbucks_xpt$calories_n, na.rm=TRUE) 
+```
+
+# Deleting columns
+
+-   Now that we have created this new numeric calorie variable, we may not want the old variable column anymore, so let's delete that column using the select function from the dplyr.
+
+```{r, chunk25}
+# using the select function
+starbucks_xpt2 <- starbucks_xpt %>%
+  select(-calories)
+
+colnames(starbucks_xpt2)
+
+# you can also do it the reverse by keeping all but the variables you want to drop
+starbucks_xpt3 <-starbucks_xpt %>%
+  dplyr::select("DRINK", "CATEGORY", "_FAT__G_", "CARBS_G", "FIBER_G", "PROT_G", "calories_n")
+colnames(starbucks_xpt3)
+```
+
+# Deleting rows
+
+-   Suppose I want to omit all the rows with NAs in them. I can use the **na.omit** function. **Be Careful**. Why might I not want to use this pan-NA drop method? What is another method I could use?
+
+```{r, chunk26}
+starbucks_xpt4 <- na.omit(starbucks_xpt)
+```
+
+-   If I wanted to delete one specific row, say row 1, we can use slice
+
+```{r, chunk27}
+starbucks_xpt5 <- starbucks_xpt4 %>%
+  slice(-1)
+```
+
+# Categorize/creating a factor variable
+
+-   Factor variables are the same as categorical variables. They are very useful in regression analysis because you can control the reference level by assigning it a value of 0.
+-   There are several ways to do this. I like the **if_else**, **mutate**, and **case_when** functions from dplyr.
+-   There are three arguments in if_else functions, the first one specifies the condition and if true, assign it the value in the second argument, otherwise assign the value in the third argument
+-   Let's categorize calories as above and below the median
+-   Note that the third argument here is actually another **if_else** function to take care of NAs. This would not be necessary if I used the dataset without NAs (starbucks_xpt4) where the third argment could just be be 1.
+-   You can also use mutate and case_when
+
+```{r, chunk28}
+# at or below the median using dplyr if_else and mutate 
+starbucks_xpt <- starbucks_xpt %>%
+ mutate(calories_med = if_else(calories_n <= 140, 0, if_else(calories_n > 140, 1, NA)))
+
+# at or below the median using dplyr if_else and case_when
+starbucks_xpt <- starbucks_xpt %>%
+ mutate(calories_medb = case_when(calories_n <= 140 ~ 0, 
+                                 calories_n > 140 ~ 1)) # NAs are automatically assigned when calories_n is missing
+```
+
+# Check the type of variable. It will be numeric until you use the **factor** function
+
+```{r, chunk29}
+class(starbucks_xpt$calories_med) 
+typeof(starbucks_xpt$calories_med) 
+```
+
+# Use the **factor** function to change from a numerical variable to a factor variable and label levels
+
+```{r, chunk30}
+starbucks_xpt$calories_med <- factor(starbucks_xpt$calories_med, levels=c(0,1), 
+              labels = c("Less than or equal to the median", "Above the median")) 
+```
+
+# Make sure it's a factor
+
+```{r, chunk31}
+class(starbucks_xpt$calories_med) 
+```
+
+# The **table** function is useful to get the n in each level and check that our categorization is correct
+
+```{r, chunk32}
+table(starbucks_xpt$calories_med, useNA = "always") 
+```
+
+# Subsetting to find the mean number of calories for 'Starbucks Espresso Beverages' (this is another way of removing rows)
+
+# Using the **filter** function from the dplyr package
+
+```{r, chunk34}
+# method 1
+espresso <- filter(starbucks_xpt, CATEGORY=='Starbucks Espresso Beverages')
+mean(espresso$calories_n, na.rm=TRUE) 
+
+# method 2
+espresso <- starbucks_xpt %>%
+  filter(CATEGORY =='Starbucks Espresso Beverages')
+
+mean(espresso$calories_n, na.rm=TRUE) 
+```
+
+# Changing a value of a variable
+
+-   Suppose there is a data entry error in Brown Sugar Shortbread Latte calories. The number should be 300 instead of 380.
+-   You need to select the observation(s) where the value needs to be changed.
+-   A dataframe object followed by brackets indicates that R should look inside the dataset for the condition inside the brackets and assign it a value to the right of the assignment operator.
+
+# Using the **if_else** function from dplyr
+
+```{r, chunk36}
+espresso <- espresso %>%
+  mutate(calories_n2 = if_else(DRINK=='Brown Sugar Shortbread Latte' & calories_n == 380, 300, calories_n))
+```
+
+# EXTRA TO REVIEW ON YOUR OWN
+
+# Creating datasets to use as examples for **cbind**, **rbind**, and **merge** functions
+
+-   with credit to: <https://www.dummies.com/programming/r/how-to-create-a-data-frame-from-scratch-in-r/> and <https://www.behindthename.com/random/>
+-   To create a dataframe with Starbucks employee information, let's first create three vectors for employees, their salaries, and their start dates.
+
+```{r, chunk37}
+employee <- c('Trayan Klavdiya','Wasswa Tadesse','Jianhong Dong', "Mary Smith")
+salary <- c(210000, 234000, 268000, 240000)
+startdate <- as.Date(c('2010-11-1','2008-3-25','2007-3-14', '2009-10-28'))
+```
+
+# Next, we combine each vector into three columns
+
+-   We can either use the **data.frame** function or the **cbind** function
+
+```{r, chunk38}
+employ.data <- data.frame(employee, salary, startdate, stringsAsFactors = FALSE)
+# the stringsAsFactors argument prevents R from turning character variables into factor variables
+
+class(employ.data)
+
+# this makes a matrix (which can be useful for math functions) instead of a dataframe but we can convert it to a dataframe using the as.data.frame function
+employ.data2 <- cbind(employee, salary, startdate) 
+class(employ.data2)
+
+employ.data2 <- as.data.frame(employ.data2)
+class(employ.data2)
+```
+
+# We can also add a column to our new dataset using the **cbind** function. This time it maintains the dataframe class.
+
+```{r, chunk39}
+coffee_pref<-c("dark", "light", "pumpkin spice", "likes tea")
+
+employ.data<-cbind(employ.data, coffee_pref, stringsAsFactors = FALSE) 
+class(employ.data)
+```
+
+# We can also add a new row using the **rbind** function, say to add a new employee
+
+-   We need to have the same variable order and number as in the dataframe we are adding the new employee to
+
+```{r, chunk40}
+new_employee <- c('Martha Kuskowski', 240500, '2020-11-01', 'pumpkin spice')
+employ.data <- rbind(employ.data, new_employee)
+View(employ.data)
+```
+
+# Let's create another dataframe of these same employees but with termination dates that we can merge with the first dataframe using the **merge** function
+
+```{r, chunk41}
+employee <- c('Trayan Klavdiya','Wasswa Tadesse','Jianhong Dong', "Mary Smith", 
+              'Martha Kuskowski')
+termdate<-as.Date(c('2021-11-1','2021-11-1','2021-11-1', '2021-11-1', 
+                    '2021-11-1'))
+employ.data2 <- data.frame(employee, termdate)
+
+# merge employ.data and employ.data2 by employee name
+all.employee.data <- merge(employ.data, employ.data2, by="employee")
+```
+
+# Let's give them ID numbers using two functions that will number the rows sequentially with integers
+
+```{r, chunk42}
+all.employee.data$ID <- seq.int(nrow(all.employee.data))
+View(employ.data)
+```
+
+# Let's reorder the columns to make a nice tidy logically ordered dataset for export to our manager.
+
+-Note: When we want to modify a dataset, we specify the dataset followed by brackets. With the brackets, the "," represents row if it comes before the modification and the column if it comes after the modification. So in this case we are reordering columns
+
+```{r, chunk43}
+all.employee.data <- all.employee.data[, c(6,1,2,3,4,5)]
+View(all.employee.data)
+```
+
+# Finally, let's export the dataset as an excel file or a csv file using the **write.xlsx** and **write.csv** functions
+
+-   The file will get exported to the same directory as your code unless you specify a file path
+
+```{r, chunk44}
+# write an excel file
+write.xlsx(all.employee.data, "all.employee.data.xlsx", overwrite=TRUE)
+
+# write a csv file
+write.csv(all.employee.data, "all.employee.data.csv")
+```
+
+# Some last words: Getting help with R
+
+-   **Quick-R**: <https://www.statmethods.net/> .
+-   **UCLA Institute for Digital Research and Education (IDRE)**: <https://stats.idre.ucla.edu/r/>
+-   **Stackoverflow**: <https://stackoverflow.com/> Please see: <https://stackoverflow.com/tour> before posting a question on this site. Users of this site get very crabby when questions are not well-written (clearly telling what problem you are trying to solve with example code reproducing the problem and showing what you already tried), so make sure you read about what not to ask about at the tour link.
+-   Google your error message or your “how do you…” question and often you will find a solution on the web. This is a completely normal part of coding, so embrace it!
+-   Use AI like ChatGPT by typing your task or question
